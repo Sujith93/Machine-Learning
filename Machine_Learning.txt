@@ -1,0 +1,169 @@
+# Data exporting --------------------------------------------------------
+
+RSA1 <- read.csv("D:/RSA/RSA_v1/RSAData_2000.csv")
+names(RSA)
+str(RSA)
+summary(RSA)
+
+# Preprocessing --------------------------------------------------------
+
+
+sapply(RSA,class)
+RSA[,c(4)]<-sapply(RSA[,c(4)],as.factor)
+
+
+# Removing unique coumns --------------------------------------------------------
+
+RSA <-
+  RSA[, !sapply(RSA, function(col)
+    nlevels(col) == 1)]  # removing factors with 1 level
+
+RSA[is.na(RSA)]<-0
+RSA <-
+  RSA[, colSums(RSA != 0) != 0]   # removing columns with colsums==0 and it will not work when NA's present
+
+RSA <-RSA[, colSums(RSA != 0) > 0]
+
+
+# data Exploration --------------------------------------------------------
+
+factors <- sapply(RSA, is.factor)
+vars_categ <- RSA[, factors]
+vars_numeric <- RSA[,!factors]
+
+vars_numeric_scale <-
+  scale(vars_numeric, center = TRUE, scale = TRUE)
+
+
+
+# Anova --------------------------------------------------------
+
+anova_result<-aov(claim_status ~ .,data = RSA)
+summary(anova_result)
+
+n <- names(RSA)
+f <- as.formula(paste("claim_status ~", paste(n[!n %in% c("claim_status","oacode","portability_insured","pincode","gender")], collapse = " * ")))
+f
+
+anova_result1<-aov(f,data = RSA)
+summary(anova_result1)
+
+
+# Partition the dataset into training and testing -------------------------
+
+library(caret)
+set.seed(500)   ### how many times u ran the code it makes the samples constant
+inTrain1 <-
+createDataPartition(RSA_bal$claim_status, p = 0.60, list = F)
+dataTrain <- RSA_bal[inTrain1, ]
+dataTest <- RSA_bal[-inTrain1, ]
+###Checking the rows for both training and testing  datasets
+nrow(dataTrain)
+nrow(dataTest)
+
+
+dataTest1[is.na(dataTest1)]<-0
+
+#SVM --------------------------------------------------------
+
+library(kernlab)
+svm_model <-
+ksvm(claim_status ~ ., data = dataTrain, kernel = "vanilladot",scaled = TRUE) #rbfdot
+summary(svm_model)
+svm_predicted <- predict(svm_model, dataTest[,-287], type = 'response')
+svm_pred <- ifelse(svm_predicted > 0.5, 1, 0)
+svm_output <- confusionMatrix(svm_pred, dataTest$claim_status,positive='1')
+
+
+# library(e1071)
+# svm_model <- svm(claim_status ~ ., data = train)
+# summary(svm_model)
+#
+# svm_predicted <- predict(svm_model, test[, -1], type = 'response')
+# svm_pred <- ifelse(svm_predicted > 0.5, 1, 0)
+# svm_output <- confusionMatrix(svm_pred, test$claim_status)
+
+
+
+# Rpart --------------------------------------------------------
+
+library(rpart)
+fit <- rpart(claim_status ~ ., data = dataTrain, method = "class")
+tree_predicted <- predict(fit, dataTest[,-288], type = 'class')
+tree_output <- confusionMatrix(tree_predicted, dataTest$claim_status,positive='1')
+
+library(rpart.plot)
+rpart.plot(fit)
+print(fit)
+
+
+# GLM ---------------------------------------------------------------------
+
+glm_model <-
+  glm(claim_status ~ .,
+      data = dataTrain,
+      family = "binomial")
+summary(glm_model)
+#library(arm)
+#bayesglm
+
+glm_predicted <- predict(glm_model, dataTest[,-292], type = 'response')
+glm_predict <- ifelse(glm_predicted > 0.5, 1, 0)
+glm_output <- confusionMatrix(glm_predict, test$claim_status)
+
+
+# C50 ---------------------------------------------------------------------
+
+library(C50)
+dataTrain$claim_status<-as.factor(dataTrain$claim_status)
+levels(dataTrain$portability_insured)[1]="missing"
+levels(dataTrain$gender)[1]="missing"
+model <- C5.0(claim_status ~ ., data = dataTrain,rules=TRUE, trials=10)
+summary(model)
+plot(model)
+results <-
+  predict(object = model,
+          newdata = dataTest[,-292],
+          type = "class")
+C50_output<-confusionMatrix(results, dataTest$claim_status)
+
+#,rules=TRUE, trials=10
+
+
+
+# RandomForest ------------------------------------------------------------
+
+library(randomForest)
+rf <- randomForest(claim_status ~ ., data = dataTrain)
+summary(rf)
+rf_predicted <- predict(rf, dataTest[,-14], type = "class")
+confusionMatrix(rf_predicted, dataTest$claim_status)
+getTree(rf, k = 1, labelVar = FALSE)
+
+# Naive Bayes -------------------------------------------------------------------
+
+library(e1071)
+e1071model <- naiveBayes(dataTrain[,-292], as.factor(dataTrain$claim_status))
+e1071modelPrediction <-
+  predict(e1071model, dataTest[,-292], type = "class")
+
+Naive_output <-
+  confusionMatrix(e1071modelPrediction, dataTest$claim_status)
+
+# nent --------------------------------------------------------------------
+
+library(nnet)
+library(NeuralNetTools)
+
+model.nn <- train(claim_status ~ .,
+                  data = dataTrain,
+                  method = "nnet")
+nn_predicted <- predict(model.nn, dataTest[, -292])
+#nn_predict <- ifelse(nn_predicted > 0.5, 1, 0)
+
+nn_output <- confusionMatrix(nn_predicted, dataTest$claim_status)
+#
+plotnet(model.nn$finalModel, y_names = "claim_status")
+title("Graphical Representation of our Neural Network")
+
+
