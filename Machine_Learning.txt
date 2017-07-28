@@ -1,3 +1,7 @@
+
+setwd("")
+getwd()
+
 # Data exporting --------------------------------------------------------
 
 RSA1 <- read.csv("D:/RSA/RSA_v1/RSAData_2000.csv")
@@ -34,7 +38,20 @@ vars_numeric <- RSA[,!factors]
 vars_numeric_scale <-
   scale(vars_numeric, center = TRUE, scale = TRUE)
 
+  
+pairs(vars_numeric)
 
+#https://stackoverflow.com/questions/18275639/remove-highly-correlated-variables
+df2 = cor(vars_numeric)
+hc = findCorrelation(
+  df2,
+  cutoff = 0.9,
+  exact = TRUE,
+  verbose = TRUE,
+  names = TRUE
+) # putt any value as a "cutoff"
+hc = sort(hc)
+reduced_Data = vars_numeric[,-c(hc)]
 
 # Anova --------------------------------------------------------
 
