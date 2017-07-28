@@ -1,0 +1,316 @@
+
+
+# Training and Testing on same data ----------------------------------------------------
+
+
+under<-read.csv("D:/underwriter/UWDecisionSheet_2500.csv")
+under<-under[,-1] #Removing Id
+str(under)
+head(under)
+summary(under)
+
+# ##Partition the dataset into training and testing
+library(caret)
+set.seed(500)   ### how many times u ran the code it makes the samples constant
+inTrain1<-createDataPartition(under$uwdecission,p=0.60,list=F)
+dataTrain<-under[inTrain1,]
+dataTest<-under[-inTrain1,]
+# ##Checking the rows for both training and testing  datasets
+nrow(dataTrain)
+nrow(dataTest)
+
+library(C50)
+model <- C5.0(uwdecission ~., data=dataTrain)
+summary(model)
+plot(model)
+results <- predict(object=model, newdata=dataTest[,-14], type="class")
+confusionMatrix(results, dataTest$uwdecission)
+# Confusion Matrix and Statistics
+# 
+# Reference
+# Prediction accepted rejected
+# accepted      350       14
+# rejected        8      627
+# 
+# Accuracy : 0.978           
+# 95% CI : (0.9668, 0.9861)
+# No Information Rate : 0.6416          
+# P-Value [Acc > NIR] : <2e-16          
+# 
+# Kappa : 0.9523          
+# Mcnemar's Test P-Value : 0.2864          
+# 
+# Sensitivity : 0.9777          
+# Specificity : 0.9782          
+# Pos Pred Value : 0.9615          
+# Neg Pred Value : 0.9874          
+# Prevalence : 0.3584          
+# Detection Rate : 0.3504          
+# Detection Prevalence : 0.3644          
+# Balanced Accuracy : 0.9779          
+# 
+# 'Positive' Class : accepted 
+
+dataTest1<-cbind(dataTest,results)
+
+
+
+# RandomForest
+library(randomForest)
+rf<-randomForest(uwdecission~.,data = dataTrain)
+summary(rf)
+rf_predicted<-predict(rf,dataTest[,-14],type = "class")
+confusionMatrix(rf_predicted,dataTest$uwdecission)
+# Confusion Matrix and Statistics
+# 
+# Reference
+# Prediction accepted rejected
+# accepted      334       20
+# rejected       24      621
+# 
+# Accuracy : 0.956           
+# 95% CI : (0.9413, 0.9678)
+# No Information Rate : 0.6416          
+# P-Value [Acc > NIR] : <2e-16          
+# 
+# Kappa : 0.904           
+# Mcnemar's Test P-Value : 0.6511          
+# 
+# Sensitivity : 0.9330          
+# Specificity : 0.9688          
+# Pos Pred Value : 0.9435          
+# Neg Pred Value : 0.9628          
+# Prevalence : 0.3584          
+# Detection Rate : 0.3343          
+# Detection Prevalence : 0.3544          
+# Balanced Accuracy : 0.9509          
+# 
+# 'Positive' Class : accepted  
+# 
+
+
+  # glm
+ glm_fit<-glm(uwdecission~., family="binomial",data = dataTrain)
+ summary(glm_fit)
+ glm_predicted<-predict(glm_fit,dataTest[,-14], type = 'response')
+ glm_predict <- ifelse(glm_predicted > 0.5,"rejected","accepted")
+ confusionMatrix(glm_predict, dataTest$uwdecission)
+ # Confusion Matrix and Statistics
+ # 
+ # Reference
+ # Prediction accepted rejected
+ # accepted      358       20
+ # rejected        0      621
+ # 
+ # Accuracy : 0.98            
+ # 95% CI : (0.9692, 0.9877)
+ # No Information Rate : 0.6416          
+ # P-Value [Acc > NIR] : < 2.2e-16       
+ # 
+ # Kappa : 0.957           
+ # Mcnemar's Test P-Value : 2.152e-05       
+ #                                          
+ #            Sensitivity : 1.0000          
+ #            Specificity : 0.9688          
+ #         Pos Pred Value : 0.9471          
+ #         Neg Pred Value : 1.0000          
+ #             Prevalence : 0.3584          
+ #         Detection Rate : 0.3584          
+ #   Detection Prevalence : 0.3784          
+ #      Balanced Accuracy : 0.9844          
+ #                                          
+ #       'Positive' Class : accepted 
+ # 
+ 
+  dataTest2<-cbind(dataTest,glm_predict)
+
+
+
+  ##Naive Bayes
+  library(e1071)
+  
+  e1071model<-naiveBayes(uwdecission~.,data=dataTrain)
+  e1071model
+  e1071modelPrediction<-predict(e1071model,dataTest[,-14])
+  confusionMatrix(e1071modelPrediction, dataTest$uwdecission)
+  # Confusion Matrix and Statistics
+  # 
+  # Reference
+  # Prediction accepted rejected
+  # accepted      334      103
+  # rejected       24      538
+  # 
+  # Accuracy : 0.8729          
+  # 95% CI : (0.8506, 0.8929)
+  # No Information Rate : 0.6416          
+  # P-Value [Acc > NIR] : < 2.2e-16       
+  # 
+  # Kappa : 0.7364          
+  # Mcnemar's Test P-Value : 4.473e-12       
+  # 
+  # Sensitivity : 0.9330          
+  # Specificity : 0.8393          
+  # Pos Pred Value : 0.7643          
+  # Neg Pred Value : 0.9573          
+  # Prevalence : 0.3584          
+  # Detection Rate : 0.3343          
+  # Detection Prevalence : 0.4374          
+  # Balanced Accuracy : 0.8861          
+  # 
+  # 'Positive' Class : accepted     
+  
+
+
+  #rpart
+  library(rpart)
+  tree <- rpart(uwdecission ~ .,
+               data = dataTrain,
+              method = "class")
+  print(tree)
+  plot(tree)
+  text(tree)
+  # plot(tree, margin=0.1)
+  # text(tree, all=T, use.n=T)
+  
+  tree_result <- predict(object=model, newdata=dataTest[,-14], type="class")
+  confusionMatrix(tree_result, dataTest$uwdecission)
+  # Confusion Matrix and Statistics
+  # 
+  # Reference
+  # Prediction accepted rejected
+  # accepted      350       14
+  # rejected        8      627
+  # 
+  # Accuracy : 0.978           
+  # 95% CI : (0.9668, 0.9861)
+  # No Information Rate : 0.6416          
+  # P-Value [Acc > NIR] : <2e-16          
+  # 
+  # Kappa : 0.9523          
+  # Mcnemar's Test P-Value : 0.2864          
+  # 
+  # Sensitivity : 0.9777          
+  # Specificity : 0.9782          
+  # Pos Pred Value : 0.9615          
+  # Neg Pred Value : 0.9874          
+  # Prevalence : 0.3584          
+  # Detection Rate : 0.3504          
+  # Detection Prevalence : 0.3644          
+  # Balanced Accuracy : 0.9779          
+  # 
+  # 'Positive' Class : accepted      
+
+  
+  
+
+#  C50 training on 2500 and testing on 500 -------------------------------------
+
+  library(C50)
+  test_data<-read.csv("D:/underwriter/UWDecisionSheet_500.csv")
+  test_data<-test_data[,-c(1)]
+  
+  model_c50 <- C5.0(uwdecission ~., data=under)
+  names(test_data)<-names(under)
+  results_c50 <- predict(object=model_c50, newdata=test_data[,-14], type="class")
+  confusionMatrix(results_c50, test_data$uwdecission)
+  
+  
+  # Confusion Matrix and Statistics
+  # 
+  # Reference
+  # Prediction accepted rejected
+  # accepted      168       23
+  # rejected        3      306
+  # 
+  # Accuracy : 0.948           
+  # 95% CI : (0.9247, 0.9658)
+  # No Information Rate : 0.658           
+  # P-Value [Acc > NIR] : < 2.2e-16       
+  # 
+  # Kappa : 0.8876          
+  # Mcnemar's Test P-Value : 0.0001944       
+  # 
+  # Sensitivity : 0.9825          
+  # Specificity : 0.9301          
+  # Pos Pred Value : 0.8796          
+  # Neg Pred Value : 0.9903          
+  # Prevalence : 0.3420          
+  # Detection Rate : 0.3360          
+  # Detection Prevalence : 0.3820          
+  # Balanced Accuracy : 0.9563          
+  # 
+  # 'Positive' Class : accepted      
+  # 
+  
+  
+  
+  
+
+
+# C50 tuned model ---------------------------------------------------------
+
+
+
+library(C50)
+model_tuned <- C5.0(uwdecission ~., data=under,rules=TRUE, trials=10)
+summary(model_tuned)
+results_tuned <- predict(object=model_tuned, newdata=test_data[,-14], type="class")
+confusionMatrix(results_tuned, test_data$uwdecission)
+# Confusion Matrix and Statistics
+# 
+# Reference
+# Prediction accepted rejected
+# accepted      168        0
+# rejected        3      329
+# 
+# Accuracy : 0.994           
+# 95% CI : (0.9826, 0.9988)
+# No Information Rate : 0.658           
+# P-Value [Acc > NIR] : <2e-16          
+# 
+# Kappa : 0.9866          
+# Mcnemar's Test P-Value : 0.2482          
+# 
+# Sensitivity : 0.9825          
+# Specificity : 1.0000          
+# Pos Pred Value : 1.0000          
+# Neg Pred Value : 0.9910          
+# Prevalence : 0.3420          
+# Detection Rate : 0.3360          
+# Detection Prevalence : 0.3360          
+# Balanced Accuracy : 0.9912          
+# 
+# 'Positive' Class : accepted    
+
+
+saveRDS(model,"D:/underwriter/UWDecision_model_tuned.rds")
+model<-readRDS("D:/underwriter/UWDecision_model_2.rds")
+summary(model)
+cat(model$rules)
+varImp(model)
+predict(model,data.frame(employeridentificationnumberein="no",
+                         employeehiringcertificatei_9docw_4="yes",
+                         no_offueldispenser_undercompliance="yes",
+                         proofofmotorvehicleortrailerregistration="yes",
+                         timelimit_parkingdays_undercompliance="yes",
+                         X24hourordinancesforhoursofoperationverified="yes",
+                         debrieslitterwastagedisposable_adequateprovision="yes",
+                         noiselevel_underlimit="yes",
+                         soleproprietorship="yes",
+                         professionalemployees="yes",
+                         cashlabour="yes",
+                         mobilityofthevehicle="yes",
+                         proximitytostructures_undercompliance="yes"),type = 'prob')
+
+test<-read.csv("D:/underwriter/UW data sheet_test.csv")
+test<-test[,-c(1)]
+names(test)<-names(under)
+res <- predict(object=model_tuned, newdata=test[,-15], type="class")
+
+model<-readRDS("D:/underwriter/UWDecision_model_2.rds")
+
+
+res_prob <- predict(object=model, newdata=test[2,-c(1,15)], type="prob")
+confusionMatrix(res,test$uwdecission)
+dataTest123<-cbind(test,res)
+
