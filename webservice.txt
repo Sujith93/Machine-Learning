@@ -1,0 +1,91 @@
+library(RCurl)
+#data(iris)
+#View(iris)
+#names(iris)
+iris<-read.csv("C:/Program Files/RStudio/iris2class.csv")
+
+irisInput<-iris[,-5]
+
+library(randomForest)
+model<-randomForest(Species~.,data=iris,method="class")
+# summary(model)
+# plot(model)
+
+mypredict<-function(newdata){
+  require(randomForest)
+  #require(Boruta)
+  predict(model,newdata,type = "response")
+}
+# print(mypredict(iris))
+
+library(AzureML)
+library(devtools)
+
+wsID="9f119c34247a49c393214a9f304c5b89"
+wsAuth="d6819252940d4bdca80654cfe6ccb313"
+
+wsobj=workspace(wsID,wsAuth)
+
+iriswebservice<-publishWebService(
+                                   wsobj,
+                                   fun=mypredict,
+                                   name = "iriswebservice",
+                                   inputSchema = irisInput,
+                                   data.frame = TRUE,noexport = character(0),
+                                   export = character(0)
+                                    
+)
+#head(iriswebservice)
+
+
+iriswebservice1 <- updateWebService(
+  wsobj,
+  fun=mypredict,
+  name = "iriswebservice1",
+  inputSchema = irisInput,
+  serviceId = iriswebservice$WebServiceId   # <<-- Required to update!
+)
+(webservices <- services(wsobj, name = "iriswebservice"))
+
+
+
+
+
+
+
+
+
+# under -----------------------------------------
+
+
+under <- read.csv("D:/underwriter/UWDecisionSheet_2500.csv")
+underInput <- under[, -c(1, 15)]
+
+
+model <- readRDS("D:/underwriter/UWDecision_model_tuned.rds")
+
+
+mypredict <- function(newdata) {
+  require(C50)
+  a <- data.frame(predict(model, newdata, type = "prob"))
+  return(a)
+}
+
+library(AzureML)
+library(devtools)
+
+wsID = "888a43fb46374a2e9e23787a02a8f808"
+wsAuth = "fzp/dft7e+4Yi5J7/tEmL1AKV05HENESwY8oV3JF2aeW8xW2n4sp15QSZ1iRNFuN2FH82K6Be9lf8GSe2d7Yew=="
+
+wsobj = workspace(wsID, wsAuth)
+
+underwebservice1 <- publishWebService(wsobj,
+                                      fun = mypredict,
+                                      name = "underwriterwebservice_tuned_prob_original",
+                                      inputSchema = underInput)
+
+
+
+underwebservice$WebServiceId
+#[1] "ba955be23c7e11e79578e74f1929ba1c"
+underwebservice$ApiLocation

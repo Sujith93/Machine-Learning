@@ -1,0 +1,65 @@
+login -> portal.azure.com
+click on add(+)
+select data + analytics
+select bot service
+
+provide the name of the bot service and required info.
+click on create.
+
+enter the provided bot service name in the search box and press enter
+click the botservice
+click on the button(Manage app id and password)
+it will generate the password
+
+id:3d9f419a-22b3-41ce-8c94-62d142ab9184
+pass:06oeF4fro2nr3QLv5Kjiwe0
+
+select the programmming language 
+c# or nodejs
+
+choose the template
+language understanding template
+ 
+click on create bot button.
+
+
+login to LUIS(Language Understanding Intelligance Service)
+
+
+New chrome window
+https://www.luis.ai/
+
+add intents if required
+greeting
+
+click train
+click publish
+it will give a link 
+https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/fb3c41eb-b6a7-44c9-84fa-194999a79bcf?subscription-key=e0b057009b6a46ee823559f9fca4aebc&timezoneOffset=0&verbose=true&spellCheck=true&q=how%20r%20u.?
+
+
+go back to azure include the code
+.matches('greeting',(session.args)=>{
+    session.send('you asked for greeting'+JSON.stringify(args));
+})
+
+
+
+https://channel9.msdn.com/events/Build/2017/P4114
+
+
+
+
+Knowledge base:
+https://qnamaker.ai/Edit/Test?kbId=673522b8-492c-460c-a8fa-83473ebc5362
+
+upload data with questions and answers
+Train with the data
+
+
+Sample HTTP request:
+POST /knowledgebases/673522b8-492c-460c-a8fa-83473ebc5362/generateAnswer
+Host: https://westus.api.cognitive.microsoft.com/qnamaker/v2.0
+Ocp-Apim-Subscription-Key: d26b06d28c6446e68b03403888c8e687
+Content-Type: application/json
+{"question":"hi"}

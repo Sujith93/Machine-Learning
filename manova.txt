@@ -1,0 +1,61 @@
+# CA 
+fit_ca <-
+  manova(
+    cbind(
+      policy_coverage_tenantslegalliabilitycoverage,
+      policy_coverage_computersandmediacoverage,
+      policy_coverage_backupofsewersanddrains,
+      policy_coverage_hiredandnonownedautoliability
+    ) ~
+      policy_physicaladdress_zipcode + policy_siccode + policy_legalentitytype +
+      policy_totalnumberofemployees + policy_computeroperations
+    ,
+    data = ca_data
+  )
+
+
+pvalues_ca <- summary(fit_ca, tol = 0)$stats[1:4, "Pr(>F)"]
+pvalues_ca[pvalues_ca < 0.06]
+
+
+# fl
+
+
+fit_fl <-
+  manova(
+    cbind(
+      policy_coverage_tenantslegalliabilitycoverage,
+      policy_coverage_computersandmediacoverage,
+      policy_coverage_backupofsewersanddrains
+      
+      
+    ) ~
+      policy_physicaladdress_zipcode + policy_siccode + policy_legalentitytype +
+      policy_totalnumberofemployees + policy_computeroperations
+    ,
+    data = fl_data
+  )
+
+
+summary(fit_fl, tol = 0)
+
+pvalues_fl <- summary(fit_fl)$stats[1:15, "Pr(>F)"]
+pvalues_fl[pvalues_fl < 0.06]
+
+
+
+fit_fl <-
+  manova(
+    cbind(
+      policy_coverage_tenantslegalliabilitycoverage,
+      policy_coverage_computersandmediacoverage,
+      policy_coverage_backupofsewersanddrains
+      
+      
+    ) ~
+      policy_physicaladdress_zipcode * policy_siccode * policy_legalentitytype *
+      policy_totalnumberofemployees * policy_computeroperations
+    ,
+    data = fl_data
+  )
+

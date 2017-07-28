@@ -1,0 +1,192 @@
+RSA<-read.csv("D:/RSA/csv/temp1.csv")
+str(RSA)
+RSA$Claims<-as.character(RSA$Claims)
+RSA$Claims<-as.factor(RSA$Claims)
+summary(RSA)
+colnames(RSA)
+RSA[is.na(RSA)]=0
+
+
+#RSA<-data.frame(apply(RSA, 2, as.factor))
+
+# RandomForest ------------------------------------------------------------
+
+
+library(randomForest)
+forest <- randomForest(Claims ~.-POLICY_NUMBER-ENDORSEMENT_CODE-RENEWAL_CODE-POLICY_START_DATE-
+                         POLICY_END_DATE-PORTABILITY_POLICY-PORTABILITY_INSURED-POR_POLICYEXPIRYDATE-
+                         NCB_PERCENTAGE-YEARSWITHRS-PROPOSER_CODE-NAME-DOB-STATE-
+                         OACode-INTERMEDIARY_CODE-CITY-BRANCHCODE-Claim_count
+                       # CAMPAIGN_NAME-PLAN_OPTION-infantmale-
+                       # infantfemale-toddlermale-seniorcitizensfemale-seniorcitizensmale-
+                       # middleagedfemale-middleagedmale-adultfemale
+                       ,    
+                       data = RSA,na.action =na.omit,ntree=3000,mtry=3,importance=TRUE )
+
+forest$importance
+a<-data.frame(importance(forest,type = 2)) #MeanDecreaseGini
+a
+write.csv(a,"D:/RSA/csv/RF_out_imp_withoutcalimcount.csv")
+
+
+#  woe & information -----------------------------------------------------
+
+
+RSA<-read.csv("D:/RSA/csv/temp1.csv") #claims must to numeric
+
+RSA<-RSA[,-c(40,8)] #removing claims_count & INTERMEDIARY_CODE
+install.packages("Information")
+library(Information)
+IV <- create_infotables(data=RSA, y="Claims", bins=20, parallel=FALSE)
+IV_Value = data.frame(IV$Summary)
+IV_Value_order=IV_Value[order(IV_Value$IV,decreasing = T),]
+
+Not_useful<-subset(IV_Value,IV <0.02)
+Weak<-subset(IV_Value,IV >0.02 & IV < 0.1)
+Medium<-subset(IV_Value,IV >0.1 & IV < 0.3)
+strong<-subset(IV_Value,IV >0.3 & IV < 0.5)
+
+
+# Recursive Feature Elimination -------------------------------------------
+
+
+library(caret)
+RSA[is.na(RSA)]=0
+
+RSA_Target<-RSA$Claims
+RSA_Predicted<-RSA[, !(colnames(RSA) %in% c("POLICY_NUMBER","ENDORSEMENT_CODE","RENEWAL_CODE","POLICY_START_DATE",
+                                            "POLICY_END_DATE","OACode","INTERMEDIARY_CODE","PORTABILITY_INSURED","PORTABILITY_POLICY",
+                                            "POR_POLICYEXPIRYDATE","NCB_PERCENTAGE","YEARSWITHRS","STATE","BRANCHCODE","CITY",
+                                            "PROPOSER_CODE","NAME","DOB","Claims","Claim_count"))]
+control <- rfeControl(functions=rfFuncs, method="cv", number=5)
+results <- rfe(RSA_Predicted, RSA_Target, sizes=2^(2:4), rfeControl=control)
+results
+
+# Variance Inflation Factors ----------------------------------------------
+
+
+library(usdm)
+vif(RSA_Predicted)
+vifcor(RSA_Predicted[,-c(1,4,5)],th=0.9)
+
+
+
+# step glm ----------------------------------------------------------------
+
+
+
+RSA_Predicted<-cbind(RSA_Predicted,Claims=RSA$Claims)
+# fit<-glm(Claims ~.
+#            ,data = RSA[,-c(1,2,3,4,5,9,10,11,13,14,15,16,17,19)], family = binomial())
+# saveRDS(fit,"D:/RSA/csv/glmfit.RDS")
+fit<-glm(Claims~.,data = RSA_Predicted,family = binomial())
+  #Stepwise Selection based on AIC
+library(MASS)
+stepAIC(fit, direction="both")
+# summary(step)
+# fit<-readRDS("D:/RSA/csv/glmfit.RDS")
+# stepwise(fit,direction = "forward")
+
+
+
+# Clustofvar --------------------------------------------------------------
+
+RSA<-read.csv("D:/RSA/csv/temp1.csv")
+
+library(digest)
+RSA_C = RSA[!duplicated(lapply(RSA, digest))]
+factors <- sapply(RSA_C, is.factor)
+vars_quali <- RSA_C[,factors]
+vars_quanti <- RSA_C[,!factors]
+vars_quanti2<-scale(vars_quanti, center=TRUE, scale=TRUE)
+
+
+
+library(ClustOfVar)
+tree_categ <- hclustvar(
+                X.quali=vars_quali[,-c(1,2,3,4,8,9,10,11,12,13,15,5,6)])
+
+tree_categ <- hclustvar(
+  X.quali=vars_quali[,c(7,14,16,17,18)])
+
+
+rect.hclust(tree_categ, k=4,  border = )
+P1<-cutreevar(tree_categ,2,matsim=TRUE)
+P1$cluster
+
+tree_num<-hclustvar(
+                X.quanti=vars_quanti2[,-c(3,4)])
+plot(tree_num, main="variable clustering")
+
+rect.hclust(tree_num, h=10,  border = 1:10)
+P2<-cutreevar(tree_num,5,matsim=TRUE)
+P2$cluster
+
+
+
+
+# varience ----------------------------------------------------------------
+
+vars_quanti
+var(vars_quanti$ENDORSEMENT_CODE)
+sapply(vars_quanti,var)
+
+
+# Feature selection -------------------------------------------------------
+
+library(fscaret)
+library(caret)
+
+RSA_full <- read.csv("D:/RSA/RSA_v1/RSAData_2000_another.csv")
+RSA_full<-RSA_full[,c(15,18,23:307)]
+RSA_full[is.na(RSA_full)]<-0
+str(RSA_full)
+RSA_full$pincode<-as.factor(RSA_full$pincode)
+names(RSA_full)
+#levels(RSA_full$gender)
+RSA_dummy<-dummyVars("~.",data=RSA_full,fullRank = F)
+RSA_full1<-as.data.frame(predict(RSA_dummy,RSA_full))
+
+
+set.seed(500)   ### how many times u ran the code it makes the samples constant
+inTrain1 <-
+  createDataPartition(RSA_full1$claim_status, p = 0.60, list = F)
+dataTrain <- RSA_full1[inTrain1, ]
+dataTest <- RSA_full1[-inTrain1, ]
+
+dataTrain <-
+  dataTrain[, colSums(dataTrain != 0) != 0]
+
+dataTest <-
+  dataTest[, colSums(dataTest != 0) != 0]
+
+fsModels<-c("glm", "gbm", "treebag", "ridge", "lasso")
+myFS<-fscaret(dataTrain,dataTest,myTimeLimit = 40,preprocessData = TRUE,
+              Used.funcRegPred = fsModels,with.labels = TRUE,
+              supress.output = FALSE,no.cores = 2)
+names(myFS)
+myFS$VarImp
+
+
+# cor and cramers ---------------------------------------------------------------
+
+factors <- sapply(claim1, is.factor)
+cat <- claim1[,factors]
+numer <- claim1[,!factors]
+
+cor(numer)
+
+
+cv.test = function(x,y) {
+  CV = sqrt(chisq.test(x, y, correct=FALSE)$statistic /
+              (length(x) * (min(length(unique(x)),length(unique(y))) - 1)))
+  return(as.numeric(CV))
+}
+names_w <- names(cat)
+cramer <- data.frame()
+for(i in 2:ncol(cat)){
+  y=numer$claim_status
+  xx <- cv.test(cat[,i],y)
+  ss <- data.frame(variable=names_w[i],cramers_value=xx)
+  cramer <- rbind(cramer,ss)  
+}
