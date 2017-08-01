@@ -15,6 +15,10 @@ summary(RSA)
 sapply(RSA,class)
 RSA[,c(4)]<-sapply(RSA[,c(4)],as.factor)
 
+# Missing values ------------------------------------------------------------
+
+lapply(train,function(x) (sum(is.na(x))/nrow(train)))
+apply(train,2,function(x) (sum(is.na(x))/nrow(train)))
 
 # Removing unique coumns --------------------------------------------------------
 
