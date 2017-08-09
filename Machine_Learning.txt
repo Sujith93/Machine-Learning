@@ -39,8 +39,31 @@ factors <- sapply(RSA, is.factor)
 vars_categ <- RSA[, factors]
 vars_numeric <- RSA[,!factors]
 
+#standardization
+
 vars_numeric_scale <-
   scale(vars_numeric, center = TRUE, scale = TRUE)
+
+Combining the scale and center transforms will standardize your data. Attributes will have a mean value of 0 and a standard deviation of 1. 
+       x <- (x - mean(x)) / sd(x)
+	   
+preprocessParams <- preProcess(iris[,1:4], method=c("center", "scale"))
+transformed <- predict(preprocessParams, iris[,1:4])
+uses:Standardisation is useful for comparing variables expressed in different units.
+NOTE:Standardisation makes no difference to the shape of a distribution.
+  
+#Normalization
+Data values can be scaled into the range of [0, 1] which is called normalization.  
+     x <- (x - min(x)) / (max(x) - min(x))
+	 
+preprocessParams <- preProcess(iris[,1:4], method=c("range"))
+transformed <- predict(preprocessParams, iris[,1:4])
+  
+ normalize <- function(x) {
+ return ((x - min(x)) / (max(x) - min(x)))
+}
+
+claim1[,c(15,149,150)] <- as.data.frame(lapply(claim1[,c(15,149,150)], normalize))
 
   
 pairs(vars_numeric)
@@ -56,6 +79,12 @@ hc = findCorrelation(
 ) # putt any value as a "cutoff"
 hc = sort(hc)
 reduced_Data = vars_numeric[,-c(hc)]
+
+
+
+
+
+
 
 # Anova --------------------------------------------------------
 
