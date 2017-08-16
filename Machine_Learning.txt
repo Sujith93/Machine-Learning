@@ -82,6 +82,8 @@ reduced_Data = vars_numeric[,-c(hc)]
 
 
 
+library(rcompanion)
+plotNormalHistogram(T_cub)
 
 
 
