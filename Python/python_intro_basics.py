@@ -433,13 +433,13 @@ else:
 
 marks=75
 if(marks>80):
-    print "Grade A"
+    print("Grade A")
 elif(marks> 60) and (marks<=80):
-    print "Grade B"
+    print("Grade B")
 elif(marks >40) and (marks<=60):
-    print "Grade c"
+    print("Grade c")
 else:
-    print "Grade D" 
+    print("Grade D")
 
 
 #and  
@@ -507,13 +507,13 @@ except:
 
 num=int(input('Enter the value of n='))
 if num<0:
-    print "enter a valid number"
+    print("enter a valid number")
 else:
     sum=0
     while(num>0):
         sum+=num
         num-=1
-print sum
+print(sum)
 
 
 #for
@@ -579,7 +579,7 @@ for quant in range(99,0,-1):
 #break
 count=0
 while True:
-    print count
+    print(count)
     count+=1
     if count>10:
         break
@@ -588,7 +588,7 @@ while True:
 for x in range(20):
     if x%2==0:
         continue
-    print x
+    print(x)
 
 #######################function#####################
 #2types
@@ -667,7 +667,7 @@ def fibo(n):
     for x in range(n):
         a=b
         b=a+b
-        print a
+        print(a)
     return b
 num=int(input("enter the value of n:"))
 fibo(num)
@@ -970,11 +970,11 @@ std_2.email="Praveen@school.com"
 std_2.marks=90
 
 
-print std_1.email
-print std_2.email
+print(std_1.email)
+print(std_2.email)
 
-print std_1.first
-print std_2.first
+print(std_1.first)
+print(std_2.first)
 
 
 ######init function(or) method , instance variable=first,last,marks
@@ -990,15 +990,15 @@ class Student:
 std1=Student("sujith","kumar",60)
 std2=Student("Praveen","krishna",90)
 
-print std1.first
-print std2.first
+print(std1.first)
+print(std2.first)
 
-print std1.email
-print std2.email
+print(std1.email)
+print(std2.email)
 
 #add actions by methods
 
-print '{} {}'.format(std1.first,std1.last)
+print('{} {}'.format(std1.first,std1.last))
 
 class Student:
     
@@ -1014,8 +1014,8 @@ class Student:
 std1=Student("sujith","kumar",60)
 std2=Student("Praveen","krishna",90)
 
-print std1.fulname()
-print std2.fulname()
+print(std1.fulname())
+print(std2.fulname())
 
 
 #class variables
@@ -1040,19 +1040,19 @@ std1=Student("sujith","kumar",60)
 std2=Student("Praveen","krishna",90)
 
 
-print std1.marks
+print(std1.marks)
 std1.apply_raise()
-print std1.marks
+print(std1.marks)
 
 
-print std2.marks
+print(std2.marks)
 std2.apply_raise()
-print std2.marks
+print(std2.marks)
 
 
 print(std2.__dict__) #give everything about std2
 
-print Student.__dict__ #class
+print(Student.__dict__) #class
 
 
 
@@ -1080,7 +1080,7 @@ class Dumb(Student):
     pass
 
 std1=Dumb("sujith","kumar",60)
-print std1.email
+print(std1.email)
 print(help(Dumb))
 
 ############
@@ -1102,11 +1102,11 @@ class Dumb(Student):
    perc_rise=1.10
 
 std1=Dumb("sujith","kumar",60)
-print std1.perc_rise
+print(std1.perc_rise)
 
 
 std1=Student("sujith","kumar",60)
-print std1.perc_rise
+print(std1.perc_rise)
 
 
 ####################Inheritance
@@ -1133,7 +1133,7 @@ class Dumb(Student):        #parent class
        self.prog_lang=prog_lang
 
 std1=Dumb("sujith","kumar",60,"Python")
-print std1.prog_lang
+print(std1.prog_lang)
 
 
 '''
@@ -1367,28 +1367,12 @@ x = [1, 2, 3]
 y = [4, 5, 6]
 
 for i, j in zip(x, y):
-   print str(i) + " / " + str(j)
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
+   print(str(i) + " / " + str(j))
    
    
    
 
-
-
-
+   
 
 
 
@@ -1758,7 +1742,7 @@ data2.contents
 syn=data2.contents
 
 for i in range(1,len(syn)-1):
-    print syn[i].a.contents
+    print(syn[i].a.contents)
 
 data2.a.contents
 data2.contents
