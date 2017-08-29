@@ -1497,8 +1497,8 @@ string2[position.start():position.end()]
 
 # re with urllib
 import re
-#import urllib.request
-import urllib
+import urllib.request
+#import urllib
 
 #https://www.google.com/finance?q=FB
 url="https://www.google.com/finance?q="
@@ -1507,7 +1507,8 @@ stock=input("Enter the Stock:")
 url=url+stock #concatinating
 url
 
-data=urllib.urlopen(url).read() #reading the page
+data=urllib.request.urlopen(url).read() #reading the page
+#data=urllib.urlopen(url).read() #reading the page
 data1=data.decode("utf-8")  #convert to html page
 
 m=re.search('meta itemprop="price"',data1)
@@ -1538,14 +1539,14 @@ print("The value of " +stock+" is "+final)
 
 
 import re
-#import urllib.request
-import urllib
+import urllib.request
+#import urllib
 
 #http://www.weather-forecast.com/locations/Paris/forecasts/latest
 city=input("Eneter the city:")
 url="http://www.weather-forecast.com/locations/"+city+"/forecasts/latest"
 
-data=urllib.urlopen(url).read() #reading the page
+data=urllib.request.urlopen(url).read() #reading the page
 data1=data.decode("utf-8")  #convert to html page
 
 m=re.search('span class="phrase"',data1)
@@ -1566,15 +1567,15 @@ print(final)
 
 
 import re
-#import urllib.request
-import urllib
+import urllib.request
+#import urllib
 
 url="http://www.dictionary.com/browse/"
 word=input("Enter the word:")
 #Gaudy
 url=url+word
 
-data=urllib.urlopen(url).read() #reading the page
+data=urllib.request.urlopen(url).read() #reading the page
 data1=data.decode("utf-8")  #convert to html page
 
 data1
@@ -1597,15 +1598,15 @@ print(definition)
 
 
 import re
-#import urllib.request
-import urllib
+import urllib.request
+#import urllib
 try:
     url="http://www.dictionary.com/browse/"
     word=input("Enter the word:")
     #Gaudy
     url=url+word
     
-    data=urllib.urlopen(url).read() #reading the page
+    data=urllib.request.urlopen(url).read() #reading the page
     data1=data.decode("utf-8")  #convert to html page
     
     data1
