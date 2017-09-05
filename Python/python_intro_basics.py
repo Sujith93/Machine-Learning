@@ -652,6 +652,51 @@ list1=[23,25,234,635]
 sum(list1)
 
 
+#map function
+#syntax
+#map(aFunction, aSequence)
+items = [1, 2, 3, 4, 5]
+def sqr(x): return x ** 2
+list(map(sqr, items))
+
+#lambda
+list(map((lambda x: x **2), items))
+
+pow(3,2)
+pow(2,10)
+list(map(pow, [2, 3, 4], [10, 11, 12]))
+
+
+m = [1,2,3]
+n = [1,4,9]
+from itertools import zip_longest
+for i,j in zip_longest(m,n):
+    print(i,j)
+    
+    
+#filter
+#filter(aFunction, aSequence) filter(): finding intersection of two lists:
+list(range(-5,5))
+list(filter((lambda x: x < 0), range(-5,5))) #only -ve values
+
+a = [1,2,3,5,7,9]
+b = [2,3,5,6,7,8]
+list(filter(lambda x: x in a, b))
+
+
+#reduce
+# It returns a single result:
+from functools import reduce
+reduce( (lambda x, y: x * y), [1, 2, 3, 4] ) #1*2*3*4
+
+reduce( (lambda x, y: x / y), [1, 2, 3, 4] )
+
+
+#join
+L = ['Testing ', 'shows ', 'the ', 'presence', ', ','not ', 'the ', 'absence ', 'of ', 'bugs']
+''.join(L)
+
+
 
 
 def add(a,b):
@@ -2461,10 +2506,6 @@ plt.show()
 
 
 
-
-
-
-
 ####################
 #pickle module for saving objects
 import pickle
@@ -2480,3 +2521,31 @@ example_dict1=pickle.load(pickle_in)
 print(example_dict1)
 
 
+
+
+
+#############
+#lambda
+
+#anonymous functions are also called lambda functions(they dnt have names)
+#syntax
+lambda arguments: expression
+
+double = lambda x: x * 2
+double(3)
+
+#same as
+def double(x):
+   return x * 2
+
+double(3)
+
+
+
+# Program to filter out only the even items from a list
+my_list = [1, 5, 4, 6, 8, 11, 3, 12]
+
+new_list = list(filter(lambda x: (x%2 == 0) , my_list))
+
+# Output: [4, 6, 8, 12]
+print(new_list)
